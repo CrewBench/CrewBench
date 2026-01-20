@@ -104,6 +104,7 @@ mac:
   gatekeeperAssess: false
   entitlements: entitlements.plist
   entitlementsInherit: entitlements.plist
+  # Fix executable name mismatch - electron-builder expects app bundle name to match
   # Note: For unsigned builds, users need to remove quarantine attribute after download
   # Run: xattr -cr /path/to/CrewBench.app
 

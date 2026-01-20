@@ -159,20 +159,29 @@ try {
 
   // 根据模式添加架构标志
   // Add arch flags based on mode
-  let archFlag = '';
-  if (multiArch) {
-    // 多架构模式：将所有架构标志传递给 electron-builder
-    // Multi-arch mode: pass all arch flags to electron-builder
-    archFlag = archArgs.map(arch => `--${arch}`).join(' ');
-    console.log(`🚀 Packaging for multiple architectures: ${archArgs.join(', ')}...`);
+  // For multi-arch builds on macOS, build separately to avoid executable rename issues
+  if (multiArch && builderArgs.includes('--mac')) {
+    console.log(`🚀 Building multiple architectures separately to avoid executable rename issues...`);
+    for (const arch of archArgs) {
+      console.log(`\n📦 Building for ${arch}...`);
+      execSync(`npx electron-builder ${builderArgs} --${arch} ${publishArg}`, { stdio: 'inherit' });
+    }
   } else {
-    // 单架构模式：使用确定的目标架构
-    // Single arch mode: use the determined target arch
-    archFlag = `--${targetArch}`;
-    console.log(`🚀 Creating distributables for ${targetArch}...`);
-  }
+    let archFlag = '';
+    if (multiArch) {
+      // 多架构模式：将所有架构标志传递给 electron-builder
+      // Multi-arch mode: pass all arch flags to electron-builder
+      archFlag = archArgs.map(arch => `--${arch}`).join(' ');
+      console.log(`🚀 Packaging for multiple architectures: ${archArgs.join(', ')}...`);
+    } else {
+      // 单架构模式：使用确定的目标架构
+      // Single arch mode: use the determined target arch
+      archFlag = `--${targetArch}`;
+      console.log(`🚀 Creating distributables for ${targetArch}...`);
+    }
 
-  execSync(`npx electron-builder ${builderArgs} ${archFlag} ${publishArg}`, { stdio: 'inherit' });
+    execSync(`npx electron-builder ${builderArgs} ${archFlag} ${publishArg}`, { stdio: 'inherit' });
+  }
 
   console.log('✅ Build completed!');
 } catch (error) {
