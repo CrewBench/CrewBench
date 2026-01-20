@@ -1,7 +1,7 @@
 {
   "name": "CrewBench",
   "productName": "CrewBench",
-  "version": "1.7.0",
+  "version": "1.1.0",
   "description": "Transform your command-line AI agent into a modern, efficient AI Chat interface.",
   "main": ".webpack/main",
   "scripts": {
@@ -39,7 +39,7 @@
   "keywords": [],
   "author": {
     "name": "CrewBench",
-    "email": "service@aionui.com"
+    "email": "abhinavsharma8750@gmail.com"
   },
   "license": "Apache-2.0",
   "devDependencies": {
