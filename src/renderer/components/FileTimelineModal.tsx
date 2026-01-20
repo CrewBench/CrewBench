@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2025 CrewBench Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 
 import { ipcBridge } from '@/common';
 import type { FileDiff, FileTimelineEntry, FileTimelineStats } from '@/process/services/fileTimelineService';
