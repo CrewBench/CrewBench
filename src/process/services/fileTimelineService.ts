@@ -60,6 +60,16 @@ class FileTimelineService {
   }
 
   /**
+   * Normalize file path for consistent storage and querying (handles Windows paths)
+   */
+  private normalizeFilePath(filePath: string): string {
+    const normalized = filePath.replace(/\\/g, '/');
+    // On Windows, normalize to lowercase for case-insensitive matching
+    // On Unix systems, keep original case
+    return process.platform === 'win32' ? normalized.toLowerCase() : normalized;
+  }
+
+  /**
    * Calculate content hash for deduplication
    */
   private calculateContentHash(content: string): string {
@@ -86,6 +96,9 @@ class FileTimelineService {
     // For delete operations, content should be empty but we still record it
     const content = params.operation === 'delete' ? '' : params.content;
 
+    // Normalize file path for consistent storage (important for Windows)
+    const normalizedFilePath = this.normalizeFilePath(params.filePath);
+
     const stmt = db.prepare(`
       INSERT INTO file_timeline (
         id, file_path, workspace, content, content_hash, operation,
@@ -95,7 +108,7 @@ class FileTimelineService {
 
     stmt.run(
       id,
-      params.filePath,
+      normalizedFilePath,
       params.workspace,
       content,
       contentHash,
@@ -126,6 +139,9 @@ class FileTimelineService {
   public getFileTimeline(filePath: string, workspace?: string): FileTimelineEntry[] {
     const db = this.getDb();
 
+    // Normalize file path for consistent querying (important for Windows)
+    const normalizedFilePath = this.normalizeFilePath(filePath);
+
     let stmt;
     if (workspace) {
       stmt = db.prepare(`
@@ -141,7 +157,7 @@ class FileTimelineService {
       `);
     }
 
-    const rows = (workspace ? stmt.all(filePath, workspace) : stmt.all(filePath)) as Array<{
+    const rows = (workspace ? stmt.all(normalizedFilePath, workspace) : stmt.all(normalizedFilePath)) as Array<{
       id: string;
       file_path: string;
       workspace: string;
@@ -172,7 +188,9 @@ class FileTimelineService {
    * Get file timeline statistics
    */
   public getFileStats(filePath: string, workspace?: string): FileTimelineStats | null {
-    const timeline = this.getFileTimeline(filePath, workspace);
+    // Normalize file path (getFileTimeline already handles this, but ensure consistency)
+    const normalizedFilePath = this.normalizeFilePath(filePath);
+    const timeline = this.getFileTimeline(normalizedFilePath, workspace);
 
     if (timeline.length === 0) {
       return null;
@@ -339,18 +357,21 @@ class FileTimelineService {
   public deleteFileTimeline(filePath: string, workspace?: string): void {
     const db = this.getDb();
 
+    // Normalize file path for consistent deletion (important for Windows)
+    const normalizedFilePath = this.normalizeFilePath(filePath);
+
     if (workspace) {
       const stmt = db.prepare(`
         DELETE FROM file_timeline
         WHERE file_path = ? AND workspace = ?
       `);
-      stmt.run(filePath, workspace);
+      stmt.run(normalizedFilePath, workspace);
     } else {
       const stmt = db.prepare(`
         DELETE FROM file_timeline
         WHERE file_path = ?
       `);
-      stmt.run(filePath);
+      stmt.run(normalizedFilePath);
     }
   }
 

@@ -100,10 +100,12 @@ mac:
   icon: resources/app.icns
   artifactName: ${productName}-${version}-${os}-${arch}.${ext}
   category: public.app-category.productivity
-  hardenedRuntime: true
+  hardenedRuntime: false  # Disable for unsigned builds to allow app to run
   gatekeeperAssess: false
   entitlements: entitlements.plist
   entitlementsInherit: entitlements.plist
+  # Note: For unsigned builds, users need to remove quarantine attribute after download
+  # Run: xattr -cr /path/to/CrewBench.app
 
 afterPack: scripts/afterPack.js
 afterSign: scripts/afterSign.js

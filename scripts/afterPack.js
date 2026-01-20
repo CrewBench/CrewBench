@@ -2,6 +2,7 @@ const { Arch } = require('builder-util');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execSync } = require('child_process');
 const { normalizeArch, rebuildSingleModule, verifyModuleBinary, getModulesToRebuild } = require('./rebuildNativeModules');
 
 /**
@@ -204,4 +205,37 @@ module.exports = async function afterPack(context) {
   }
 
   console.log(`✅ All native modules rebuilt successfully for ${targetArch}\n`);
+
+  // Ad-hoc code signing for macOS unsigned builds (allows app to run without certificate)
+  // This helps users bypass Gatekeeper for development/test builds
+  if (electronPlatformName === 'darwin') {
+    const appName = packager?.appInfo?.productFilename || 'CrewBench';
+    const appPath = path.join(appOutDir, `${appName}.app`);
+    
+    // Only perform ad-hoc signing if no certificate was provided
+    // Check if CSC_NAME (certificate identity) is set - if not, do ad-hoc signing
+    if (!process.env.CSC_NAME && !process.env.CSC_IDENTITY_AUTO_DISCOVERY) {
+      try {
+        console.log(`\n📝 Performing ad-hoc code signing for ${appName}...`);
+        console.log(`   This allows the app to run on macOS without developer certificate`);
+        console.log(`   For production builds, configure proper code signing certificates\n`);
+        
+        // Ad-hoc signing using - sign with ad-hoc identity
+        execSync(`codesign --force --deep --sign - "${appPath}"`, { stdio: 'inherit' });
+        console.log(`   ✓ Ad-hoc signing completed`);
+        
+        // Verify the signing
+        try {
+          execSync(`codesign --verify --verbose "${appPath}"`, { stdio: 'pipe' });
+          console.log(`   ✓ Signature verified`);
+        } catch (verifyError) {
+          console.warn(`   ⚠️  Signature verification warning (this is normal for ad-hoc signing)`);
+        }
+      } catch (error) {
+        console.warn(`   ⚠️  Ad-hoc signing failed: ${error.message}`);
+        console.warn(`   Users may need to remove quarantine attribute manually`);
+        // Don't throw - ad-hoc signing is optional
+      }
+    }
+  }
 };
