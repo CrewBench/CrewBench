@@ -412,8 +412,8 @@ jobs:
             out/*.dmg
             out/*.deb
             out/*.AppImage
-            out/AionUi-*-win32-*.zip
-            out/AionUi-*-mac-*.zip
+            out/CrewBench-*-win32-*.zip
+            out/CrewBench-*-mac-*.zip
           if-no-files-found: warn
           retention-days: 7
 

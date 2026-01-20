@@ -1,7 +1,7 @@
-appId: com.aionui.app
-productName: AionUi
-executableName: AionUi
-copyright: Copyright © 2024 AionUi
+appId: com.crewbench.app
+productName: CrewBench
+executableName: CrewBench
+copyright: Copyright © 2026 CrewBench
 
 asar:
   smartUnpack: true
@@ -117,15 +117,15 @@ linux:
   icon: resources/app.png
   artifactName: ${productName}-${version}-${os}-${arch}.${ext}
   category: Utility
-  maintainer: aionui
-  vendor: aionui
+  maintainer: crewbench
+  vendor: crewbench
   synopsis: ${description}
   description: ${description}
   desktop:
     entry:
-      Name: AionUi
+      Name: CrewBench
       Comment: ${description}
-      Icon: aionui
+      Icon: crewbench
       Categories: Office;Utility;
 
 npmRebuild: false
@@ -152,6 +152,6 @@ electronDownload:
 
 publish:
   provider: github
-  owner: ${env.GITHUB_REPOSITORY_OWNER:-aionui}
-  repo: ${env.GITHUB_REPOSITORY_NAME:-AionUi}
+  owner: ${env.GITHUB_REPOSITORY_OWNER:-crewbench}
+  repo: ${env.GITHUB_REPOSITORY_NAME:-CrewBench}
   publishAutoUpdate: false
