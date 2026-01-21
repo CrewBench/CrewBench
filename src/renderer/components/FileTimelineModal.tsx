@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 import { ipcBridge } from '@/common';
 import type { FileDiff, FileTimelineEntry, FileTimelineStats } from '@/process/services/fileTimelineService';
 import AionModal from '@/renderer/components/base/AionModal';
@@ -33,7 +32,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
   // Load timeline data
   useEffect(() => {
     if (visible && filePath) {
-      loadTimeline();
+      void loadTimeline();
     }
   }, [visible, filePath, workspace]);
 
@@ -41,8 +40,14 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
     setLoading(true);
     try {
       const [timelineData, statsData] = await Promise.all([
-        ipcBridge.fileTimeline.getFileTimeline.invoke({ filePath, workspace }),
-        ipcBridge.fileTimeline.getFileStats.invoke({ filePath, workspace }),
+        ipcBridge.fileTimeline.getFileTimeline.invoke({
+          filePath,
+          workspace,
+        }),
+        ipcBridge.fileTimeline.getFileStats.invoke({
+          filePath,
+          workspace,
+        }),
       ]);
 
       setTimeline(timelineData);
@@ -63,7 +68,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
   // Load diff when version is selected
   useEffect(() => {
     if (selectedVersion && timeline.length > 0) {
-      loadDiff();
+      void loadDiff();
     }
   }, [selectedVersion, timeline]);
 
@@ -115,11 +120,6 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
     return date.toLocaleString();
   };
 
-  const getOperationIcon = (operation: string) => {
-    // Return empty string - no icons needed
-    return '';
-  };
-
   const getOperationColor = (operation: string): string => {
     switch (operation) {
       case 'create':
@@ -137,11 +137,12 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
     <AionModal
       visible={visible}
       onCancel={onCancel}
+      footer={null}
       size='large'
+      contentStyle={{ height: 'calc(80vh)', overflow: 'hidden' }}
       header={
         <div className='flex items-center justify-between w-full'>
           <div className='flex items-center gap-8px' style={{ alignItems: 'center' }}>
-
             <Typography.Title heading={5} className='m-0' style={{ lineHeight: '1.5', margin: 0 }}>
               {t('timeline.title') || 'File Timeline'}
             </Typography.Title>
@@ -151,9 +152,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
               </Typography.Text>
             )}
           </div>
-          <Button size='small' icon={<Refresh />} onClick={loadTimeline} loading={loading}>
-            
-          </Button>
+          <Button size='small' icon={<Refresh />} onClick={loadTimeline} loading={loading}></Button>
         </div>
       }
     >
@@ -179,12 +178,10 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
             <AionScrollArea className='h-full'>
               <Spin loading={loading}>
                 {timeline.length === 0 ? (
-                  <div className='p-16px text-center text-t-secondary'>
-                    {t('timeline.noChanges') || 'No changes tracked for this file'}
-                  </div>
+                  <div className='p-16px text-center text-t-secondary'>{t('timeline.noChanges') || 'No changes tracked for this file'}</div>
                 ) : (
                   <Timeline className='p-16px'>
-                    {timeline.map((entry, index) => (
+                    {timeline.map((entry, _index) => (
                       <Timeline.Item
                         key={entry.id}
                         dot={
@@ -199,19 +196,10 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
                           />
                         }
                       >
-                        <div
-                          className={`cursor-pointer p-8px rd-6px transition-colors ${selectedVersion === entry.id ? 'bg-fill-2' : 'hover:bg-fill-1'}`}
-                          onClick={() => setSelectedVersion(entry.id)}
-                        >
+                        <div className={`cursor-pointer p-8px rd-6px transition-colors ${selectedVersion === entry.id ? 'bg-fill-2' : 'hover:bg-fill-1'}`} onClick={() => setSelectedVersion(entry.id)}>
                           <div className='flex items-center gap-4px mb-4px'>
-                            <Typography.Text className='text-12px font-500 text-t-primary'>
-                              {t(`timeline.operation.${entry.operation}`) || entry.operation}
-                            </Typography.Text>
-                            {entry.agentType && (
-                              <Typography.Text className='text-11px text-t-secondary ml-auto'>
-                                {entry.agentType}
-                              </Typography.Text>
-                            )}
+                            <Typography.Text className='text-12px font-500 text-t-primary'>{t(`timeline.operation.${entry.operation}`) || entry.operation}</Typography.Text>
+                            {entry.agentType && <Typography.Text className='text-11px text-t-secondary ml-auto'>{entry.agentType}</Typography.Text>}
                           </div>
                           <Typography.Text className='text-11px text-t-secondary'>{formatDate(entry.createdAt)}</Typography.Text>
                         </div>
@@ -228,17 +216,8 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
             {selectedVersion && diff ? (
               <>
                 <div className='flex items-center justify-between mb-12px'>
-                  <Typography.Text className='text-14px font-500 text-t-primary'>
-                    {t('timeline.diff') || 'Changes in this version'}
-                  </Typography.Text>
-                  <Button
-                    type='primary'
-                    size='small'
-                    icon={<Undo />}
-                    onClick={handleRevert}
-                    loading={reverting}
-                    disabled={!selectedVersion || diff.toVersion.operation === 'delete'}
-                  >
+                  <Typography.Text className='text-14px font-500 text-t-primary'>{t('timeline.diff') || 'Changes in this version'}</Typography.Text>
+                  <Button type='primary' size='small' icon={<Undo />} onClick={handleRevert} loading={reverting} disabled={!selectedVersion || diff.toVersion.operation === 'delete'}>
                     {t('timeline.revert') || 'Revert to this version'}
                   </Button>
                 </div>
@@ -248,8 +227,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
                     {diff.addedLines > 0 || diff.removedLines > 0 ? (
                       <div className='mb-12px'>
                         <Typography.Text className='text-12px text-t-secondary'>
-                          {t('timeline.linesAdded') || 'Lines added'}: <span style={{ color: 'rgb(var(--success-6))' }}>+{diff.addedLines}</span> |{' '}
-                          {t('timeline.linesRemoved') || 'Lines removed'}: <span style={{ color: 'rgb(var(--danger-6))' }}>-{diff.removedLines}</span>
+                          {t('timeline.linesAdded') || 'Lines added'}: <span style={{ color: 'rgb(var(--success-6))' }}>+{diff.addedLines}</span> | {t('timeline.linesRemoved') || 'Lines removed'}: <span style={{ color: 'rgb(var(--danger-6))' }}>-{diff.removedLines}</span>
                         </Typography.Text>
                       </div>
                     ) : (
@@ -276,11 +254,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
                           key={index}
                           style={{
                             color: line.startsWith('+') ? 'rgb(var(--success-6))' : line.startsWith('-') ? 'rgb(var(--danger-6))' : 'var(--text-1)',
-                            backgroundColor: line.startsWith('+')
-                              ? 'rgba(var(--success-6-rgb), 0.1)'
-                              : line.startsWith('-')
-                                ? 'rgba(var(--danger-6-rgb), 0.1)'
-                                : 'transparent',
+                            backgroundColor: line.startsWith('+') ? 'rgba(var(--success-6-rgb), 0.1)' : line.startsWith('-') ? 'rgba(var(--danger-6-rgb), 0.1)' : 'transparent',
                             padding: '2px 4px',
                             margin: '1px 0',
                           }}
@@ -293,9 +267,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
                 </AionScrollArea>
               </>
             ) : (
-              <div className='flex-1 flex items-center justify-center text-t-secondary'>
-                {t('timeline.selectVersion') || 'Select a version to view changes'}
-              </div>
+              <div className='flex-1 flex items-center justify-center text-t-secondary'>{t('timeline.selectVersion') || 'Select a version to view changes'}</div>
             )}
           </div>
         </div>

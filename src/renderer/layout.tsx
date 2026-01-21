@@ -6,7 +6,7 @@
 
 import { ipcBridge } from '@/common';
 import { ConfigStorage } from '@/common/storage';
-import logoImage from '@/renderer/assets/logo.png';
+import logoImage from '@/renderer/assets/logo.svg';
 import PwaPullToRefresh from '@/renderer/components/PwaPullToRefresh';
 import Titlebar from '@/renderer/components/Titlebar';
 import { Layout as ArcoLayout } from '@arco-design/web-react';
@@ -21,7 +21,7 @@ import { processCustomCss } from './utils/customCssProcessor';
 
 const useDebug = () => {
   const [count, setCount] = useState(0);
-  const timer = useRef<any>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onClick = () => {
     const open = () => {
       ipcBridge.application.openDevTools.invoke().catch((error) => {
@@ -233,7 +233,7 @@ const Layout: React.FC<{
                       if (isMobile) setCollapsed(true);
                     },
                     collapsed,
-                  } as any)
+                  } as React.ComponentProps<typeof ArcoLayout.Sider>)
                 : sider}
             </ArcoLayout.Content>
           </ArcoLayout.Sider>
