@@ -22,30 +22,24 @@ CrewBench runs as a desktop application where:
 - Agents can read and write real project files
 - Every file change is tracked, diffed, and reversible
 - Developers remain in control of agent scope and actions
+  
+---
 
-This repository does **not** duplicate AionUi documentation.  
-Instead, it extends AionUi with **engineering-grade tooling** around safety, traceability, and control.
+## Technical Focus Areas
+
+| Focus Area                  | What It Covers                                                                                                  | Why It Matters                                                                           |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Observability**           | • File timelines and diffs<br>• Clear agent vs human attribution<br>• Action-level history                      | Lets developers *see exactly what happened*, who did it (human or AI), and in what order |
+| **Control / Guardrails**    | • Path-based read/write restrictions<br>• Operation-level permissions<br>• Confirmation gates for risky actions | Prevents agents from touching the wrong files or making unsafe changes                   |
+| **Reproducibility**         | • Inspectable agent action sequences<br>• Debugging and diagnosis of AI behavior                                | Makes AI behavior debuggable, auditable, and repeatable                                  |
+| **Human + Agent Workflows** | • Continuous history across human and agent edits<br>• No context loss between steps                            | Enables seamless collaboration without losing state or intent                            |
 
 ---
 
-## Relationship to AionUi
 
-AionUi provides the base platform, including:
+## Enhancements Done
 
-- Multi-agent orchestration
-- Desktop UI infrastructure
-- File system access
-- Local-first execution
-- Cross-platform support
-
-CrewBench builds **on top of this foundation** and focuses specifically on **software engineering workflows**.
-
-**AionUi documentation & full feature list:**  
-https://github.com/iOfficeAI/AionUi
-
----
-
-## File-Level Version Tracking (CrewBench Extension)
+### File-Level Version Tracking (CrewBench Extension)
 
 ![File Timeline](resources/timeline.png)
 
@@ -67,27 +61,20 @@ This complements Git by tracking **agent behavior**, not commits.
 
 ---
 
-## Technical Focus Areas
+## Our Relationship to AionUi
 
-CrewBench development focuses on:
+AionUi provides the base platform, including:
 
-### Observability
-- File timelines and diffs
-- Clear agent vs human attribution
-- Action-level history
+- Multi-agent orchestration
+- Desktop UI infrastructure
+- File system access
+- Local-first execution
+- Cross-platform support
 
-### Control / Guardrails
-- Path-based read/write restrictions
-- Operation-level permissions
-- Confirmation gates for risky actions
+CrewBench builds **on top of this foundation** and focuses specifically on **software engineering workflows**.
 
-### Reproducibility
-- Inspectable agent action sequences
-- Debugging and diagnosis of AI behavior
-
-### Human + Agent Workflows
-- Continuous history across human and agent edits
-- No context loss between steps
+> **AionUi documentation & full feature list:**  
+> https://github.com/iOfficeAI/AionUi
 
 ---
 
