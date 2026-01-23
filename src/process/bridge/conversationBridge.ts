@@ -378,6 +378,28 @@ export function initConversationBridge(): void {
     await copyFilesToDirectory(task.workspace, files);
 
     try {
+      // Log User Message
+      try {
+        const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
+        const behaviorLogService = getBehaviorLogService();
+
+        // Truncate long messages for display
+        const truncatedContent = other.input.length > 100 ? other.input.substring(0, 100) + '...' : other.input;
+
+        behaviorLogService.log({
+          workspace: task.workspace,
+          actor: 'User',
+          actionType: 'message',
+          description: `User: "${truncatedContent}"`,
+          metadata: {
+            fullContent: other.input,
+            conversationId: conversation_id,
+          },
+        });
+      } catch (logError) {
+        console.error('[conversationBridge] Failed to log user behavior:', logError);
+      }
+
       // 根据 task 类型调用对应的 sendMessage 方法
       if (task.type === 'gemini') {
         await (task as GeminiAgentManager).sendMessage({ ...other, files });

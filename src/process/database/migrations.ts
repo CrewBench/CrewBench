@@ -206,9 +206,42 @@ const migration_v7: IMigration = {
 };
 
 /**
+ * Migration v7 -> v8: Add behavior_logs table
+ * Track agent and user actions for behavior history
+ */
+const migration_v8: IMigration = {
+  version: 8,
+  name: 'Add behavior_logs table',
+  up: (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS behavior_logs (
+        id TEXT PRIMARY KEY,
+        workspace TEXT,
+        actor TEXT NOT NULL CHECK(actor IN ('User', 'Agent', 'System')),
+        agent_type TEXT,
+        action_type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        metadata TEXT,
+        created_at INTEGER NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_behavior_logs_workspace_created ON behavior_logs(workspace, created_at DESC);
+    `);
+    console.log('[Migration v8] Added behavior_logs table');
+  },
+  down: (db) => {
+    db.exec(`
+      DROP INDEX IF EXISTS idx_behavior_logs_workspace_created;
+      DROP TABLE IF EXISTS behavior_logs;
+    `);
+    console.log('[Migration v8] Rolled back: Removed behavior_logs table');
+  },
+};
+
+/**
  * All migrations in order
  */
-export const ALL_MIGRATIONS: IMigration[] = [migration_v1, migration_v2, migration_v3, migration_v4, migration_v5, migration_v6, migration_v7];
+export const ALL_MIGRATIONS: IMigration[] = [migration_v1, migration_v2, migration_v3, migration_v4, migration_v5, migration_v6, migration_v7, migration_v8];
 
 /**
  * Get migrations needed to upgrade from one version to another

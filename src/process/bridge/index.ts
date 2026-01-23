@@ -8,19 +8,20 @@ import { acpDetector } from '@/agent/acp/AcpDetector';
 import { initAcpConversationBridge } from './acpConversationBridge';
 import { initApplicationBridge } from './applicationBridge';
 import { initAuthBridge } from './authBridge';
+import { initBehaviorLogBridge } from './behaviorLogBridge';
 import { initCodexConversationBridge } from './codexConversationBridge';
 import { initConversationBridge } from './conversationBridge';
-import { initDocumentBridge } from './documentBridge';
 import { initDatabaseBridge } from './databaseBridge';
 import { initDialogBridge } from './dialogBridge';
+import { initDocumentBridge } from './documentBridge';
+import { initFileTimelineBridge } from './fileTimelineBridge';
 import { initFileWatchBridge } from './fileWatchBridge';
 import { initFsBridge } from './fsBridge';
-import { initGeminiConversationBridge } from './geminiConversationBridge';
 import { initGeminiBridge } from './geminiBridge';
+import { initGeminiConversationBridge } from './geminiConversationBridge';
 import { initMcpBridge } from './mcpBridge';
 import { initModelBridge } from './modelBridge';
 import { initPreviewHistoryBridge } from './previewHistoryBridge';
-import { initFileTimelineBridge } from './fileTimelineBridge';
 import { initShellBridge } from './shellBridge';
 import { initWindowControlsBridge } from './windowControlsBridge';
 
@@ -45,6 +46,7 @@ export function initAllBridges(): void {
   initDatabaseBridge();
   initPreviewHistoryBridge();
   initFileTimelineBridge();
+  initBehaviorLogBridge();
   initDocumentBridge();
   initWindowControlsBridge();
 }

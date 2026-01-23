@@ -87,7 +87,7 @@ export function initFileTimelineBridge(): void {
         const { ipcBridge } = await import('@/common');
         const pathSegments = version.filePath.split(path.sep);
         const fileName = pathSegments[pathSegments.length - 1];
-        
+
         ipcBridge.fileStream.contentUpdate.emit({
           filePath: version.filePath,
           content: version.content,

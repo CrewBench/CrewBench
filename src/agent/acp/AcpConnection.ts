@@ -497,7 +497,7 @@ export class AcpConnection {
   private async handleWriteTextFile(params: { path: string; content: string }): Promise<null> {
     try {
       await fs.mkdir(path.dirname(params.path), { recursive: true });
-      
+
       // Check if file exists to determine operation type
       let fileExists = false;
       try {
