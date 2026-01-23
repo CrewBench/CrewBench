@@ -187,6 +187,7 @@ export class GeminiAgentManager extends BaseAgentManager<{
       .then(() => super.sendMessage(data));
     return result;
   }
+  private _accumulatedResponse = '';
 
   init() {
     super.init();
@@ -197,6 +198,7 @@ export class GeminiAgentManager extends BaseAgentManager<{
       }
       if (data.type === 'start') {
         this.status = 'running';
+        this._accumulatedResponse = ''; // Reset on new response
       }
 
       // 处理预览打开事件（chrome-devtools 导航触发）/ Handle preview open event (triggered by chrome-devtools navigation)
@@ -214,6 +216,37 @@ export class GeminiAgentManager extends BaseAgentManager<{
           addOrUpdateMessage(this.conversation_id, tMessage, 'gemini');
         }
       }
+
+      // Accumulate content for logging
+      if (data.type === 'content' && typeof data.data === 'string') {
+        this._accumulatedResponse += data.data;
+      }
+
+      if (data.type === 'finish') {
+        // Log behavior with accumulated content
+        const responseContent = this._accumulatedResponse;
+        const truncated = responseContent.length > 150 ? responseContent.substring(0, 150) + '...' : responseContent;
+
+        void (async () => {
+          try {
+            const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
+            getBehaviorLogService().log({
+              workspace: this.workspace,
+              actor: 'Agent',
+              agentType: 'Gemini',
+              actionType: 'response',
+              description: truncated ? `Agent: "${truncated}"` : 'Agent finished responding',
+              metadata: {
+                fullResponse: responseContent.length > 500 ? responseContent.substring(0, 500) + '...' : responseContent,
+              },
+            });
+          } catch (e) {
+            console.error('Failed to log agent behavior', e);
+          }
+        })();
+        this._accumulatedResponse = ''; // Clear after logging
+      }
+
       ipcBridge.geminiConversation.responseStream.emit(data);
     });
   }

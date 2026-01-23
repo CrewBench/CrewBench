@@ -44,12 +44,12 @@ const AboutModalContent: React.FC = () => {
     },
     {
       title: t('settings.contactMe'),
-      url: 'https://x.com/WailiVery',
+      url: 'https://x.com/abhinavsharma_x',
       icon: <Right theme='outline' size='16' />,
     },
     {
       title: t('settings.officialWebsite'),
-      url: 'https://www.aionui.com',
+      url: 'https://github.com/CrewBench/CrewBench/',
       icon: <Right theme='outline' size='16' />,
     },
   ];

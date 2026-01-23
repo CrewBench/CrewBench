@@ -9,6 +9,9 @@ import type { WorkspaceStateDetail } from '@renderer/utils/workspaceEvents';
 import { WORKSPACE_STATE_EVENT, dispatchWorkspaceToggleEvent } from '@renderer/utils/workspaceEvents';
 import WindowControls from '../WindowControls';
 
+import { IconHistory } from '@arco-design/web-react/icon';
+import BehaviorLogModal from '../BehaviorLogModal';
+
 interface TitlebarProps {
   workspaceAvailable: boolean;
 }
@@ -17,6 +20,7 @@ const Titlebar: React.FC<TitlebarProps> = ({ workspaceAvailable }) => {
   const { t } = useTranslation();
   const appTitle = useMemo(() => t('app.name', { defaultValue: 'CrewBench' }), [t]);
   const [workspaceCollapsed, setWorkspaceCollapsed] = useState(true);
+  const [behaviorLogVisible, setBehaviorLogVisible] = useState(false);
   const layout = useLayoutContext();
 
   // 监听工作空间折叠状态，保持按钮图标一致 / Sync workspace collapsed state for toggle button
@@ -91,8 +95,12 @@ const Titlebar: React.FC<TitlebarProps> = ({ workspaceAvailable }) => {
             {workspaceCollapsed ? <ExpandRight theme='outline' size='18' fill='currentColor' /> : <ExpandLeft theme='outline' size='18' fill='currentColor' />}
           </button>
         )}
+        <button type='button' className='app-titlebar__button' onClick={() => setBehaviorLogVisible(true)} aria-label={t('behavior.history', { defaultValue: 'Behavior History' })}>
+          <IconHistory style={{ fontSize: 18 }} />
+        </button>
         {showWindowControls && <WindowControls />}
       </div>
+      <BehaviorLogModal visible={behaviorLogVisible} onCancel={() => setBehaviorLogVisible(false)} />
     </div>
   );
 };

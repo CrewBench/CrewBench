@@ -38,7 +38,7 @@ interface GeminiAgent2Options {
   GOOGLE_CLOUD_PROJECT?: string;
   mcpServers?: Record<string, unknown>;
   contextFileName?: string;
-  conversationId?: string;  // Conversation ID for timeline tracking
+  conversationId?: string; // Conversation ID for timeline tracking
   onStreamEvent: (event: { type: string; data: unknown; msg_id: string }) => void;
   // 系统规则，在初始化时注入到 userMemory / System rules, injected into userMemory at initialization
   presetRules?: string;

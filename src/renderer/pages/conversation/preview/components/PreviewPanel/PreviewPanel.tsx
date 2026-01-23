@@ -11,7 +11,7 @@ import { useResizableSplit } from '@/renderer/hooks/useResizableSplit';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PreviewConfirmModals, PreviewContextMenu, PreviewHistoryDropdown, PreviewTabs, PreviewToolbar, type CloseTabConfirmState, type ContextMenuState, type PreviewTab } from '.';
-import { DEFAULT_SPLIT_RATIO, FILE_TYPES_WITH_BUILTIN_OPEN, MAX_SPLIT_WIDTH, MIN_SPLIT_WIDTH } from '../../constants';
+import { DEFAULT_SPLIT_RATIO, MAX_SPLIT_WIDTH, MIN_SPLIT_WIDTH } from '../../constants';
 import { usePreviewContext } from '../../context/PreviewContext';
 import { PreviewToolbarExtrasProvider, type PreviewToolbarExtras } from '../../context/PreviewToolbarExtrasContext';
 import { usePreviewHistory, usePreviewKeyboardShortcuts, useScrollSync, useTabOverflow, useThemeDetection } from '../../hooks';
@@ -51,7 +51,7 @@ const PreviewPanel: React.FC = () => {
   // 确认对话框状态 / Confirmation dialog states
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [closeTabConfirm, setCloseTabConfirm] = useState<CloseTabConfirmState>({ show: false, tabId: null });
-  
+
   // 文件时间线模态框状态 / File timeline modal state
   const [showFileTimeline, setShowFileTimeline] = useState(false);
 
@@ -265,11 +265,6 @@ const PreviewPanel: React.FC = () => {
   const isMarkdown = contentType === 'markdown';
   const isHTML = contentType === 'html';
   const isEditable = metadata?.editable !== false; // 默认可编辑 / Default editable
-
-  // 检查文件类型是否已有内置的打开按钮（Word、PPT、PDF、Excel 组件内部已提供）
-  // Check if file type already has built-in open button
-  // (Word, PPT, PDF, Excel components provide their own)
-  const hasBuiltInOpenButton = (FILE_TYPES_WITH_BUILTIN_OPEN as readonly string[]).includes(contentType);
 
   // 对所有有 filePath 的文件显示"在系统中打开"按钮（统一在工具栏显示）
   // Show "Open in System" button for all files with filePath (unified in toolbar)
@@ -600,14 +595,7 @@ const PreviewPanel: React.FC = () => {
         )}
 
         {/* 文件时间线模态框 / File Timeline Modal */}
-        {activeTab?.metadata?.filePath && (
-          <FileTimelineModal
-            visible={showFileTimeline}
-            filePath={activeTab.metadata.filePath}
-            workspace={activeTab.metadata.workspace}
-            onCancel={handleCloseFileTimeline}
-          />
-        )}
+        {activeTab?.metadata?.filePath && <FileTimelineModal visible={showFileTimeline} filePath={activeTab.metadata.filePath} workspace={activeTab.metadata.workspace} onCancel={handleCloseFileTimeline} />}
 
         {/* 预览内容 / Preview content */}
         {renderContent()}

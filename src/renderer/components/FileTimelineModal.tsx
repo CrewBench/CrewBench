@@ -152,7 +152,7 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
               </Typography.Text>
             )}
           </div>
-          <Button size='small' icon={<Refresh />} onClick={loadTimeline} loading={loading}></Button>
+          <Button type='text' size='small' icon={<Refresh />} onClick={loadTimeline} loading={loading} />
         </div>
       }
     >
@@ -217,7 +217,20 @@ const FileTimelineModal: React.FC<FileTimelineModalProps> = ({ visible, filePath
               <>
                 <div className='flex items-center justify-between mb-12px'>
                   <Typography.Text className='text-14px font-500 text-t-primary'>{t('timeline.diff') || 'Changes in this version'}</Typography.Text>
-                  <Button type='primary' size='small' icon={<Undo />} onClick={handleRevert} loading={reverting} disabled={!selectedVersion || diff.toVersion.operation === 'delete'}>
+                  <Button
+                    type='primary'
+                    size='small'
+                    icon={<Undo style={{ marginRight: 6 }} />}
+                    onClick={handleRevert}
+                    loading={reverting}
+                    disabled={!selectedVersion || diff.toVersion.operation === 'delete'}
+                    style={{
+                      borderRadius: 8,
+                      boxShadow: 'none',
+                      color: 'white',
+                      padding: '0 10px',
+                    }}
+                  >
                     {t('timeline.revert') || 'Revert to this version'}
                   </Button>
                 </div>

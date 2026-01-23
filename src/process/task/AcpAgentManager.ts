@@ -1,16 +1,16 @@
 import { AcpAgent } from '@/agent/acp';
 import { ipcBridge } from '@/common';
-import type { AcpBackend } from '@/types/acpTypes';
-import { ACP_BACKENDS_ALL } from '@/types/acpTypes';
 import type { TMessage } from '@/common/chatLib';
-import { AIONUI_FILES_MARKER } from '@/common/constants';
 import { transformMessage } from '@/common/chatLib';
+import { AIONUI_FILES_MARKER } from '@/common/constants';
 import type { IConfirmMessageParams, IResponseMessage } from '@/common/ipcBridge';
 import { parseError, uuid } from '@/common/utils';
+import type { AcpBackend } from '@/types/acpTypes';
+import { ACP_BACKENDS_ALL } from '@/types/acpTypes';
 import { ProcessConfig, loadSkillsContent } from '../initStorage';
 import { addMessage, addOrUpdateMessage, nextTickToLocalFinish } from '../message';
-import BaseAgentManager from './BaseAgentManager';
 import { handlePreviewOpenEvent } from '../utils/previewUtils';
+import BaseAgentManager from './BaseAgentManager';
 
 interface AcpAgentManagerData {
   workspace?: string;
@@ -83,6 +83,8 @@ class AcpAgentManager extends BaseAgentManager<AcpAgentManagerData> {
         console.warn('[AcpAgentManager] Custom backend specified but customAgentId is missing');
       }
 
+      let _accumulatedResponse = '';
+
       this.agent = new AcpAgent({
         id: data.conversation_id,
         backend: data.backend,
@@ -102,6 +104,38 @@ class AcpAgentManager extends BaseAgentManager<AcpAgentManagerData> {
             if (tMessage) {
               addOrUpdateMessage(v.conversation_id, tMessage, data.backend);
             }
+          }
+
+          // Accumulate content for logging
+          if (v.type === 'content' && typeof v.data === 'string') {
+            _accumulatedResponse += v.data;
+          }
+          if (v.type === 'start') {
+            _accumulatedResponse = ''; // Reset on new response
+          }
+
+          if (v.type === 'finish') {
+            const responseContent = _accumulatedResponse;
+            const truncated = responseContent.length > 150 ? responseContent.substring(0, 150) + '...' : responseContent;
+
+            void (async () => {
+              try {
+                const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
+                getBehaviorLogService().log({
+                  workspace: this.workspace,
+                  actor: 'Agent',
+                  agentType: data.backend || 'ACP',
+                  actionType: 'response',
+                  description: truncated ? `Agent: "${truncated}"` : 'Agent finished responding',
+                  metadata: {
+                    fullResponse: responseContent.length > 500 ? responseContent.substring(0, 500) + '...' : responseContent,
+                  },
+                });
+              } catch (e) {
+                console.error('Failed to log agent behavior', e);
+              }
+            })();
+            _accumulatedResponse = ''; // Clear after logging
           }
           ipcBridge.acpConversation.responseStream.emit(v);
         },

@@ -490,6 +490,24 @@ export function initFsBridge(): void {
       } else {
         await fs.unlink(targetPath);
 
+        // Log delete to behavior log
+        try {
+          const { getBehaviorLogService } = await import('../services/behaviorLogService');
+          const pathSegments = targetPath.split(path.sep);
+          const fileName = pathSegments[pathSegments.length - 1];
+          const workspace = pathSegments.slice(0, -1).join(path.sep);
+
+          getBehaviorLogService().log({
+            workspace,
+            actor: 'User',
+            actionType: 'file_delete',
+            description: `Deleted: ${fileName}`,
+            metadata: { filePath: targetPath },
+          });
+        } catch (logError) {
+          console.error('[fsBridge] Failed to log delete:', logError);
+        }
+
         // 发送流式删除事件到预览面板（用于关闭预览）
         // Send streaming delete event to preview panel (to close preview)
         try {
@@ -537,6 +555,23 @@ export function initFsBridge(): void {
       }
 
       await fs.rename(targetPath, newPath);
+
+      // Log rename to behavior log
+      try {
+        const { getBehaviorLogService } = await import('../services/behaviorLogService');
+        const oldName = path.basename(targetPath);
+
+        getBehaviorLogService().log({
+          workspace: directory,
+          actor: 'User',
+          actionType: 'file_rename',
+          description: `Renamed: ${oldName} → ${newName}`,
+          metadata: { oldPath: targetPath, newPath },
+        });
+      } catch (logError) {
+        console.error('[fsBridge] Failed to log rename:', logError);
+      }
+
       return { success: true, data: { newPath } };
     } catch (error) {
       console.error('Failed to rename entry:', error);

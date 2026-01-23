@@ -6,6 +6,7 @@
 
 import { uuid } from '@/common/utils';
 import { getDatabase } from '@/process/database/export';
+import { getBehaviorLogService } from '@/process/services/behaviorLogService';
 import type Database from 'better-sqlite3';
 import { createHash } from 'crypto';
 
@@ -55,8 +56,8 @@ class FileTimelineService {
   private getDb(): Database.Database {
     // Access the internal db property using type assertion
     // This is safe because we control both the service and database classes
-    const dbInstance = getDatabase() as any;
-    return dbInstance.db as Database.Database;
+    const dbInstance = getDatabase() as unknown as { db: Database.Database };
+    return dbInstance.db;
   }
 
   /**
@@ -79,15 +80,7 @@ class FileTimelineService {
   /**
    * Record a file change in the timeline
    */
-  public recordChange(params: {
-    filePath: string;
-    workspace: string;
-    content: string;
-    operation: 'create' | 'write' | 'delete';
-    agentType?: string;
-    conversationId?: string;
-    messageId?: string;
-  }): FileTimelineEntry {
+  public recordChange(params: { filePath: string; workspace: string; content: string; operation: 'create' | 'write' | 'delete'; agentType?: string; conversationId?: string; messageId?: string }): FileTimelineEntry {
     const db = this.getDb();
     const contentHash = this.calculateContentHash(params.content);
     const createdAt = Date.now();
@@ -106,18 +99,34 @@ class FileTimelineService {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    stmt.run(
-      id,
-      normalizedFilePath,
-      params.workspace,
-      content,
-      contentHash,
-      params.operation,
-      params.agentType || null,
-      params.conversationId || null,
-      params.messageId || null,
-      createdAt
-    );
+    stmt.run(id, normalizedFilePath, params.workspace, content, contentHash, params.operation, params.agentType || null, params.conversationId || null, params.messageId || null, createdAt);
+
+    // Record behavior log
+    try {
+      const behaviorLogService = getBehaviorLogService();
+
+      let actor: 'User' | 'Agent' | 'System' = 'System';
+      if (params.agentType) {
+        actor = params.agentType.toLowerCase() === 'user' ? 'User' : 'Agent';
+      }
+
+      behaviorLogService.log({
+        workspace: params.workspace,
+        actor,
+        agentType: params.agentType,
+        actionType: `file_${params.operation}`,
+        description: `${actor} ${params.operation}d file: ${params.filePath}`,
+        metadata: {
+          filePath: params.filePath,
+          operation: params.operation,
+          conversationId: params.conversationId,
+          messageId: params.messageId,
+          changeSize: params.content.length,
+        },
+      });
+    } catch (error) {
+      console.error('[FileTimelineService] Failed to record behavior log:', error);
+    }
 
     return {
       id,
@@ -382,11 +391,13 @@ class FileTimelineService {
     const db = this.getDb();
 
     const rows = db
-      .prepare(`
+      .prepare(
+        `
       SELECT DISTINCT file_path FROM file_timeline
       WHERE workspace = ?
       ORDER BY file_path
-    `)
+    `
+      )
       .all(workspace) as Array<{ file_path: string }>;
 
     return rows.map((row) => row.file_path);
