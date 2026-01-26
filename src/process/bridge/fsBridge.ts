@@ -339,6 +339,24 @@ export function initFsBridge(): void {
           console.error('[fsBridge] ❌ Failed to emit file stream update:', emitError);
         }
 
+        // Log to behavior log
+        try {
+          const { getBehaviorLogService } = await import('../services/behaviorLogService');
+          const pathSegments = filePath.split(path.sep);
+          const fileName = pathSegments[pathSegments.length - 1];
+          const workspace = pathSegments.slice(0, -1).join(path.sep);
+
+          getBehaviorLogService().log({
+            workspace,
+            actor: 'User',
+            actionType: fileExists ? 'file_update' : 'file_create',
+            description: fileExists ? `Updated: ${fileName}` : `Created: ${fileName}`,
+            metadata: { filePath },
+          });
+        } catch (logError) {
+          console.error('[fsBridge] Failed to log file write:', logError);
+        }
+
         // Record to file timeline so manual edits show up in File Timeline
         try {
           const timelineService = getFileTimelineService();

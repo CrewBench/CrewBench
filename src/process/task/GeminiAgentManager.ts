@@ -247,6 +247,30 @@ export class GeminiAgentManager extends BaseAgentManager<{
         this._accumulatedResponse = ''; // Clear after logging
       }
 
+      if (data.type === 'behavior_log') {
+        const logData = data.data as {
+          actionType: string;
+          description: string;
+          metadata?: Record<string, unknown>;
+        };
+
+        void (async () => {
+          try {
+            const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
+            getBehaviorLogService().log({
+              workspace: this.workspace,
+              actor: 'Agent',
+              agentType: 'Gemini',
+              actionType: logData.actionType,
+              description: logData.description,
+              metadata: logData.metadata,
+            });
+          } catch (e) {
+            console.error('Failed to log agent behavior', e);
+          }
+        })();
+      }
+
       ipcBridge.geminiConversation.responseStream.emit(data);
     });
   }

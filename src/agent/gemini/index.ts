@@ -294,6 +294,90 @@ export class GeminiAgent {
     this.scheduler = new CoreToolScheduler({
       onAllToolCallsComplete: async (completedToolCalls: CompletedToolCall[]) => {
         await Promise.resolve(); // Satisfy async requirement
+
+        // Log tool executions for behavior history
+        try {
+          for (const tc of completedToolCalls) {
+            if (tc.status !== 'success') continue;
+
+            const name = tc.request.name;
+            const args = tc.request.args as Record<string, unknown>;
+
+            // Helper to get arg value case-insensitively
+            const getArg = (keys: string[]): string | undefined => {
+              if (!args) return undefined;
+              const entries = Object.entries(args);
+              for (const key of keys) {
+                const entry = entries.find(([k]) => k.toLowerCase() === key.toLowerCase());
+                if (entry) return String(entry[1]);
+              }
+              return undefined;
+            };
+
+            let actionType = '';
+            let description = '';
+            let metadata: Record<string, unknown> = {};
+
+            // Explicit File Create
+            if (!actionType && (name.includes('write') || name.includes('create'))) {
+              const filePath = getArg(['TargetFile', 'targetFile', 'filePath', 'path', 'file']);
+              if (filePath) {
+                actionType = 'file_create';
+                const fileName = filePath.split(/[/\\]/).pop() || filePath;
+                description = `Agent wrote to file: ${fileName}`;
+                metadata = { filePath };
+              }
+            }
+
+            // Explicit File Update
+            if (!actionType && (name.includes('replace') || name.includes('edit') || name.includes('update'))) {
+              const filePath = getArg(['TargetFile', 'targetFile', 'filePath', 'path', 'file']);
+              if (filePath) {
+                actionType = 'file_update';
+                const fileName = filePath.split(/[/\\]/).pop() || filePath;
+                description = `Agent updated file: ${fileName}`;
+                metadata = { filePath };
+              }
+            }
+
+            // Explicit File Move/Rename
+            if (!actionType && (name.includes('move') || name.includes('rename'))) {
+              const oldPath = getArg(['source', 'oldPath', 'from', 'path', 'file', 'targetFile']);
+              const newPath = getArg(['destination', 'dest', 'newPath', 'to']);
+              if (oldPath || newPath) {
+                actionType = 'file_update';
+                description = `Agent moved/renamed file: ${oldPath ? oldPath.split(/[/\\]/).pop() || oldPath : 'unknown'} ${newPath ? 'to ' + (newPath.split(/[/\\]/).pop() || newPath) : ''}`;
+                metadata = { oldPath, newPath };
+              }
+            }
+
+            // Fallback: Command Execution
+            // If we haven't identified it as a file op, check if it looks like a command
+            if (!actionType) {
+              const command = getArg(['CommandLine', 'commandLine', 'command', 'cmd', 'exec', 'code', 'script']);
+              if (command) {
+                actionType = 'command_execution';
+                description = `Agent executed command: ${command}`;
+                metadata = { command };
+              }
+            }
+
+            if (actionType && description) {
+              this.onStreamEvent({
+                type: 'behavior_log',
+                data: {
+                  actionType,
+                  description,
+                  metadata,
+                },
+                msg_id: this.activeMsgId ?? uuid(),
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Failed to log tool execution behavior:', e);
+        }
+
         try {
           if (completedToolCalls.length > 0) {
             const refreshMemory = async () => {
