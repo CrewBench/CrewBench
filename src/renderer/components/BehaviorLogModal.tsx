@@ -134,8 +134,8 @@ const BehaviorLogModal: React.FC<BehaviorLogModalProps> = ({ visible, workspace,
                         </Tag>
                         <Typography.Text bold>{log.actionType}</Typography.Text>
                       </div>
-                      <Typography.Text className='text-text-2 block mb-1'>{log.description}</Typography.Text>
-                      {log.metadata && (log.actionType.startsWith('file_') || log.actionType === 'response') && <pre className='text-xs bg-fill-3 p-2 rounded overflow-auto mt-2 text-text-3 max-h-32'>{log.actionType === 'response' && typeof log.metadata.fullResponse === 'string' ? log.metadata.fullResponse : JSON.stringify(log.metadata, null, 2)}</pre>}
+                      {log.actionType !== 'response' && <Typography.Text className='text-text-2 block mb-1'>{log.description}</Typography.Text>}
+                      {log.metadata && (log.actionType.startsWith('file_') || log.actionType === 'response' || log.actionType === 'command_execution') && <pre className='text-xs bg-fill-3 p-2 rounded overflow-auto mt-2 text-text-3 max-h-32'>{log.actionType === 'response' && typeof log.metadata.fullResponse === 'string' ? log.metadata.fullResponse : JSON.stringify(log.metadata, null, 2)}</pre>}
                     </div>
                   </Timeline.Item>
                 ))}
