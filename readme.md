@@ -20,11 +20,15 @@
     <a href="https://github.com/CrewBench/CrewBench"><strong>Explore the docs »</strong></a>
     <br />
     <br />
+    <a href="#getting-started">Getting Started</a>
+    &middot;
     <a href="https://github.com/CrewBench/CrewBench/releases">View Demo</a>
     &middot;
     <a href="https://github.com/CrewBench/CrewBench/issues/new?template=bug_report.yml">Report Bug</a>
     &middot;
     <a href="https://github.com/CrewBench/CrewBench/issues/new?template=feature_request.yml">Request Feature</a>
+    &middot;
+    <a href="#contact">Contact Us</a>
   </p>
 </div>
 
@@ -36,9 +40,15 @@
       <a href="#overview">Overview</a>
       <ul>
         <li><a href="#core-features">Core Features</a></li>
-        <li><a href="#special-features">Special Features</a></li>
+        <li>
+          <a href="#special-features">Special Features</a>
+          <ul>
+            <li><a href="#file-level-version-tracking-and-crewbench-logging">File Level Version Tracking</a></li>
+            <li><a href="#action-logs">Action Logs</a></li>
+          </ul>
+        </li>
         <li><a href="#technical-focus-areas">Technical Focus Areas</a></li>
-        <li><a href="#our-relationship-to-aionui">Our Relationship to AionUi</a></li>
+        <li><a href="#our-relationship-to-aionui">Relationship to AionUi</a></li>
         <li><a href="#what-crewbench-does-not-do">What CrewBench Does Not Do</a></li>
       </ul>
     </li>
@@ -51,25 +61,19 @@
       </ul>
     </li>
     <li>
-      <a href="#crewbench-usage">Usage</a>
+      <a href="#crewbench-usage">CrewBench Usage</a>
       <ul>
-        <li><a href="#cowork-with-cli-ai-agents-unified-developer-interface">Cowork With CLI AI Agents</a></li>
+        <li><a href="#cowork-with-cli-ai-agents">Cowork With CLI AI Agents</a></li>
         <li><a href="#cowork-directly-on-your-codebase">Cowork Directly on Your Codebase</a></li>
-        <li><a href="#inspect-agent-output-not-just-results">Inspect Agent Output</a></li>
+        <li><a href="#inspect-agent-output">Inspect Agent Output</a></li>
         <li><a href="#file-timeline-and-action-logs">File Timeline and Action Logs</a></li>
-        <li><a href="#parallel-task-execution-without-context-collision">Parallel Task Execution</a></li>
-        <li><a href="#remote-coworking-and-team-workflows">Remote Coworking</a></li>
+        <li><a href="#parallel-task-execution">Parallel Task Execution</a></li>
+        <li><a href="#remote-coworking">Remote Coworking</a></li>
         <li><a href="#developer-controlled-interface">Developer-Controlled Interface</a></li>
       </ul>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li>
-      <a href="#contributing">Contributing</a>
-      <ul>
-        <li><a href="#how-to-contribute">How to Contribute</a></li>
-        <li><a href="#contribution-guidelines">Contribution Guidelines</a></li>
-      </ul>
-    </li>
+    <li><a href="#contributing-to-crewbench">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
@@ -88,30 +92,21 @@ It provides **visibility, control, and rollback** over how AI agents read and mo
 
 CrewBench is built on top of **[AionUi](https://github.com/iOfficeAI/AionUi) (Apache-2.0)** and inherits all upstream AionUi capabilities, while adding **developer-focused observability and guardrails**.
 
-### Core Features
+## Core Features
 
-| Feature                                | Description                                                                                                           |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Local Conversation Storage**         | All chats are stored **locally**, ensuring persistence, privacy, and zero cloud lock-in.                              |
-| **Multi-Model Support**                | Seamlessly switch between **Gemini, OpenAI, Claude, Qwen**, and other mainstream models.                              |
-| **Local Model Integration**            | Connect local models via **Ollama, LM Studio**, or any custom OpenAI-compatible endpoint (e.g. `localhost:11434/v1`). |
-| **File Timeline\***                    | Every file change is recorded in a **chronological timeline** — see what changed, when, and why.                      |
-| **Action Logs & Audit Trail\***        | Detailed logs of **AI actions and human actions**, enabling full observability and debugging.                         |
-| **Gemini 3 Subscription Optimization** | Automatically detects active subscriptions and recommends **advanced Gemini models** when available.                  |
-| **File Tree Management**               | Browse your project like a real filesystem with **drag & drop support** for files and folders.                        |
-| **AI-Assisted File Organization**      | Let AI intelligently **classify, organize, and restructure folders** based on project context.                        |
-| **Preview Panel (Agent Visibility)**   | Preview **9+ formats** (PDF, Word, Excel, PPT, Markdown, code, images, HTML) instantly after AI actions.              |
-| **Real-Time File Tracking**            | Automatically tracks file changes with **live updates** for Markdown, code, and HTML.                                 |
-| **Inline Editing & Debugging**         | Edit generated content directly and debug outputs without leaving the workspace.                                      |
-| **AI Image Generation**                | Generate images using multiple models like **Gemini 2.5 Flash, Nano, Banana**.                                        |
-| **Image Recognition & Editing**        | Perform AI-powered image analysis, understanding, and modifications.                                                  |
-| **WebUI Remote Access**                | Access CrewBench from any device on your network via browser — desktop or mobile.                                     |
-| **Local-First Data Security**          | All data is stored locally in **SQLite**, making it safe for personal or server deployment.                           |
-| **Custom CSS Theming**                 | Fully customize UI colors, layout, and styles using **your own CSS**.                                                 |
+| Feature                          | Description                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Universal Model Support**      | Work with cloud and local models through a unified interface, including OpenAI-compatible APIs and local runtimes. |
+| **Agent Coworking Environment**  | Multiple agents and tasks can run in parallel with isolated context, enabling real cowork-style workflows.         |
+| **Direct File System Access**    | Agents operate directly on real project files via a file-tree interface, not abstract chat outputs.                |
+| **File Timeline**                | Every file change is recorded in a chronological timeline, making agent activity inspectable and reviewable.       |
+| **Action Logs & Audit Trail**    | Full logs of both AI and human actions provide observability, debugging capability, and reproducibility.           |
+| **Live Preview & Editing**       | Generated artifacts are surfaced as editable, previewable files rather than hidden chat responses.                 |
+| **Extensible & Customizable UI** | The interface is developer-controlled, supporting layout flexibility and custom CSS theming.                       |
 
 ### Special Features:
 
-File Level Version Tracking and CrewBench Logging
+#### File Level Version Tracking and CrewBench Logging
 
 ![File Timeline](resources/timeline.png)
 
@@ -123,13 +118,20 @@ CrewBench adds **AI-aware file version tracking**, recording every agent-initiat
 - Agent attribution
 - Timestamped history per workspace
 
-Developers can:
-
-- Inspect how a file evolved across agent actions
-- Compare versions visually
-- Revert a file to any previous state
-
 This complements Git by tracking **agent behavior**, not commits.
+
+#### Action Logs
+
+![Action Logs](resources/logs.png)
+
+Action logs provide a comprehensive audit trail of all actions performed by agents and humans in the workspace. Each log entry includes:
+
+- Timestamp
+- Action type (create, write, delete)
+- Agent attribution
+- File path
+- Content snapshots
+- Line-based diffs
 
 ### Technical Focus Areas
 
@@ -189,13 +191,12 @@ CrewBench operates at the **control and observability layer**, not the editor or
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- USAGE EXAMPLES -->
-
 ## CrewBench Usage
 
-### Cowork With CLI AI Agents (Unified Developer Interface)
+<details>
+<summary><strong id="cowork-with-cli-ai-agents">Cowork With CLI AI Agents (Unified Developer Interface)</strong></summary>
 
-If you already use command-line AI tools such as Gemini CLI, Claude Code, Codex, Qwen Code, Goose, or similar, CrewBench acts as the graphical cowork layer on top of them.
+CrewBench acts as a graphical cowork layer on top of existing command-line AI coding tools like Gemini CLI, Claude Code, Codex, Qwen Code, Goose, and more.
 
 | Capability           | Description                                      |
 | -------------------- | ------------------------------------------------ |
@@ -204,11 +205,14 @@ If you already use command-line AI tools such as Gemini CLI, Claude Code, Codex,
 | Context Isolation    | Each agent and task runs with independent memory |
 | Local Execution      | Agents run locally on your machine               |
 
+</details>
+
 ---
 
-### Cowork Directly on Your Codebase
+<details>
+<summary><strong id="cowork-directly-on-your-codebase">Cowork Directly on Your Codebase</strong></summary>
 
-Agents operate on real project files, not abstract chat outputs.
+Agents operate on real project files — not abstract chat outputs.
 
 | Developer Need    | How CrewBench Supports It                  |
 | ----------------- | ------------------------------------------ |
@@ -217,11 +221,14 @@ Agents operate on real project files, not abstract chat outputs.
 | Batch Operations  | Rename, merge, and reorganize files        |
 | Safe Changes      | All changes are tracked and reviewable     |
 
+</details>
+
 ---
 
-### Inspect Agent Output, Not Just Results
+<details>
+<summary><strong id="inspect-agent-output">Inspect Agent Output, Not Just Results</strong></summary>
 
-CrewBench surfaces agent outputs as first-class artifacts.
+CrewBench surfaces agent outputs as first-class artifacts you can inspect and modify.
 
 | Visibility Feature   | Description                                     |
 | -------------------- | ----------------------------------------------- |
@@ -230,11 +237,14 @@ CrewBench surfaces agent outputs as first-class artifacts.
 | Inline Editing       | Edit or refine agent output directly            |
 | Change Awareness     | See what changed, not just the final state      |
 
+</details>
+
 ---
 
-### File Timeline and Action Logs
+<details>
+<summary><strong id="file-timeline-and-action-logs">File Timeline and Action Logs</strong></summary>
 
-CrewBench is designed for engineering-grade observability.
+Engineering-grade observability for AI coding agents.
 
 | Observability Tool | Purpose                                        |
 | ------------------ | ---------------------------------------------- |
@@ -243,11 +253,14 @@ CrewBench is designed for engineering-grade observability.
 | Change Attribution | Clear mapping of who (or which agent) did what |
 | Reproducibility    | Inspect and debug agent behavior               |
 
+</details>
+
 ---
 
-### Parallel Task Execution Without Context Collision
+<details>
+<summary><strong id="parallel-task-execution">Parallel Task Execution Without Context Collision</strong></summary>
 
-Multiple tasks can run in parallel without contaminating context.
+Run multiple tasks simultaneously without cross-contamination.
 
 | Workflow Pattern  | Support                                |
 | ----------------- | -------------------------------------- |
@@ -255,11 +268,14 @@ Multiple tasks can run in parallel without contaminating context.
 | Isolated Memory   | No cross-task confusion                |
 | Long-Running Work | Persistent sessions for ongoing work   |
 
+</details>
+
 ---
 
-### Remote Coworking and Team Workflows
+<details>
+<summary><strong id="remote-coworking">Remote Coworking and Team Workflows</strong></summary>
 
-Control and observe your agents remotely while keeping execution local.
+Control and observe agents remotely while keeping execution local.
 
 | Capability          | Description                                           |
 | ------------------- | ----------------------------------------------------- |
@@ -268,17 +284,24 @@ Control and observe your agents remotely while keeping execution local.
 | Server Deployment   | Suitable for self-hosted setups                       |
 | CrewBench Teams     | Collaborative multi-developer workflows (coming soon) |
 
+</details>
+
 ---
 
-### Developer-Controlled Interface
+<details>
+<summary><strong id="developer-controlled-interface">Developer-Controlled Interface</strong></summary>
 
-CrewBench adapts to your workflow, not the other way around.
+CrewBench adapts to your workflow — not the other way around.
 
-| Customization      | Description                                           |
-| ------------------ | ----------------------------------------------------- |
-| CSS Customization  | Full control over UI appearance                       |
-| Layout Flexibility | Shape the interface around your workflow              |
-| Personal Setup     | Make CrewBench feel like your development environment |
+| Customization      | Description                              |
+| ------------------ | ---------------------------------------- |
+| CSS Customization  | Full control over UI appearance          |
+| Layout Flexibility | Shape the interface around your workflow |
+| Personal Setup     | Make CrewBench feel like your own IDE    |
+
+</details>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Roadmap
 
@@ -290,60 +313,9 @@ CrewBench adapts to your workflow, not the other way around.
 
 <!-- CONTRIBUTING -->
 
-## Contributing
+## Contributing to CrewBench
 
-CrewBench is built in the open and contributions are welcome.  
-Before writing code, please start with an issue so changes can be discussed and aligned with the project direction.
-
-### How to Contribute
-
-1. **Open an Issue First**
-   - Describe the bug, feature request, or improvement
-   - Provide context, use cases, and (if applicable) screenshots or logs
-   - Label the issue appropriately (bug, enhancement, discussion)
-
-2. **Fork the Repository**  
-   Create your own fork to work on the change.
-
-3. **Create a Feature Branch**
-
-   ```bash
-   git checkout -b feature/your-feature-name
-
-   ```
-
-4. **Make Your Changes**
-   - Keep changes focused and scoped to the issue
-   - Follow existing code style and conventions
-   - Add logs or comments where behavior may not be obvious
-
-5. **Commit Your Changes**
-
-   ```bash
-   git commit -m "feat: describe your change clearly"
-   ```
-
-6. **Push to Your Fork**
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-7. **Open a Pull Request**
-   - Reference the related issue
-   - Explain what changed and why
-   - Include screenshots or demos if UI-related
-
-### Contribution Guidelines
-
-- Prefer small, reviewable pull requests
-- Avoid introducing breaking changes without discussion
-- Keep developer experience and observability in mind
-- All code should respect CrewBench’s local-first and transparent design principles
-
-Thank you for helping improve CrewBench.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+To contribute to CrewBench, please read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ### Top contributors:
 
@@ -363,7 +335,7 @@ Distributed under the project_license. See `LICENSE.txt` for more information.
 
 ## Contact
 
-Abhinav Sharma - [@abhinavsharma](https://twitter.com/abhinavsharma)
+Abhinav Sharma - [x/abhinavsharma_x](https://twitter.com/abhinavsharma_x)
 
 Project Link: [https://github.com/CrewBench/CrewBench](https://github.com/CrewBench/CrewBench)
 
