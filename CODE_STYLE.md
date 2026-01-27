@@ -1,134 +1,113 @@
-# 代码风格指南
+Here you go, brother 👊
+**Pure copy-paste Markdown**, no extra talk. Save it as `CODE_STYLE.md` (or drop it into your README).
 
-本项目使用 ESLint 和 Prettier 来确保代码质量和一致性。
+````md
+# Code Style Guide
 
-## 工具配置
+This project uses **ESLint** and **Prettier** to ensure high code quality, consistency, and maintainability across the codebase.
+
+---
+
+## Tooling Configuration
 
 ### ESLint
 
-- 配置文件：`.eslintrc.json`
-- 忽略文件：`.eslintignore`
-- 主要规则：
-  - TypeScript 支持
-  - 导入规则检查
-  - 代码长度限制（120字符）
-  - 未使用变量检查
-  - 类型安全检查
+- **Config file**: `.eslintrc.json`
+- **Ignore file**: `.eslintignore`
+- **Key rules**:
+  - TypeScript support
+  - Import/order validation
+  - Maximum line length (120 characters)
+  - Unused variable detection
+  - Type safety enforcement
+
+---
 
 ### Prettier
 
-- 配置文件：`.prettierrc.json`
-- 忽略文件：`.prettierignore`
-- 格式化规则：
-  - 单引号
-  - 分号
-  - 2空格缩进
-  - 行长度限制（700字符）
+- **Config file**: `.prettierrc.json`
+- **Ignore file**: `.prettierignore`
+- **Formatting rules**:
+  - Single quotes
+  - Semicolons
+  - 2-space indentation
+  - Maximum line length (700 characters)
 
-## 可用的脚本命令
+---
 
-### 代码检查
+## Available Scripts
+
+### Code Quality Checks
 
 ```bash
-# 运行 ESLint 检查
+# Run ESLint checks
 npm run lint
 
-# 运行 ESLint 检查并自动修复
+# Run ESLint with auto-fix
 npm run lint:fix
 
-# 检查代码格式
+# Check code formatting
 npm run format:check
 
-# 自动格式化代码
+# Auto-format code
 npm run format
 ```
+````
 
-### Git Hooks
+---
 
-项目配置了 Git hooks 来确保代码质量：
+## Git Hooks
 
-1. **pre-commit**: 在提交前自动运行 lint-staged
-2. **commit-msg**: 检查提交信息格式
+This project uses Git hooks to enforce code quality automatically:
 
-### 提交信息格式
+1. **pre-commit**
+   Runs `lint-staged` before each commit
 
-提交信息必须遵循以下格式：
+2. **commit-msg**
+   Validates commit message format
+
+---
+
+## Commit Message Convention
+
+All commit messages must follow this format:
 
 ```
 type(scope): description
 ```
 
-类型（type）：
+### Allowed types
 
-- `feat`: 新功能
-- `fix`: 修复bug
-- `docs`: 文档更新
-- `style`: 代码格式调整
-- `refactor`: 代码重构
-- `test`: 测试相关
-- `chore`: 构建过程或辅助工具变动
+- `feat` – New features
+- `fix` – Bug fixes
+- `docs` – Documentation updates
+- `style` – Formatting or stylistic changes
+- `refactor` – Code refactoring
+- `test` – Test-related changes
+- `chore` – Build process or tooling changes
 
-示例：
+### Examples
 
 ```
-feat: 添加用户登录功能
-fix(login): 修复登录验证问题
-docs: 更新API文档
+feat: add user authentication
+fix(login): fix validation issue
+docs: update API documentation
 ```
 
-## 工作流程
+---
 
-1. **开发时**：
-   - 编写代码
-   - 运行 `npm run lint` 检查代码质量
-   - 运行 `npm run format` 格式化代码
+## Workflow
 
-2. **提交前**：
-   - Git hooks 会自动运行 lint-staged
-   - 自动修复可修复的问题
-   - 检查提交信息格式
+### During Development
 
-3. **持续集成**：
-   - 可以运行 `npm run lint` 和 `npm run format:check` 来验证代码质量
+1. Write code
+2. Run `npm run lint` to check code quality
+3. Run `npm run format` to format code
 
-## 常见问题
+---
 
-### 忽略特定文件的检查
+### Before Committing
 
-在 `.eslintignore` 或 `.prettierignore` 中添加文件路径。
-
-### 禁用特定行的检查
-
-```typescript
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const data: any = getData();
-```
-
-### 自定义规则
-
-在 `.eslintrc.json` 中修改规则配置。
-
-## IDE 集成
-
-### VS Code
-
-推荐安装以下扩展：
-
-- ESLint
-- Prettier - Code formatter
-
-配置 `settings.json`：
-
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  }
-}
-```
-
-### 其他编辑器
-
-请参考相应编辑器的 ESLint 和 Prettier 插件配置。
+1. Git hooks automatically run `lint-staged`
+2. Auto-fix issues where possible
+3. Validate commit message format

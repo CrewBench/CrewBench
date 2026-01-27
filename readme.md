@@ -15,7 +15,7 @@
 <h3 align="center">CrewBench</h3>
 
   <p align="center">
-    An open-source, enhanced version of Claude Code built specifically for programmers.
+    An open-source, enhanced version of Claude Cowork built specifically for programmers.
     <br />
     <a href="https://github.com/CrewBench/CrewBench"><strong>Explore the docs »</strong></a>
     <br />
@@ -90,7 +90,8 @@ CrewBench is a **desktop UI and control layer for AI coding agents** such as Cla
 
 It provides **visibility, control, and rollback** over how AI agents read and modify a real codebase.
 
-CrewBench is built on top of **[AionUi](https://github.com/iOfficeAI/AionUi) (Apache-2.0)** and inherits all upstream AionUi capabilities, while adding **developer-focused observability and guardrails**.
+> [!NOTE]
+> CrewBench is built on top of **[AionUi](https://github.com/iOfficeAI/AionUi) (Apache-2.0)** and inherits all upstream AionUi capabilities, while adding **developer-focused observability and guardrails**.
 
 ## Core Features
 
@@ -133,6 +134,8 @@ Action logs provide a comprehensive audit trail of all actions performed by agen
 - Content snapshots
 - Line-based diffs
 
+---
+
 ### Technical Focus Areas
 
 | Focus Area                  | What It Covers                                                                                                  | Why It Matters                                                                           |
@@ -154,14 +157,16 @@ AionUi provides the base platform, including:
 
 CrewBench builds **on top of this foundation** and focuses specifically on **software engineering workflows**.
 
-### What CrewBench Does Not Do
-
-- Does not replace Git
-- Does not replace an IDE
-- Does not introduce new AI models
-- Does not focus on prompt presets
-
-CrewBench operates at the **control and observability layer**, not the editor or model layer.
+> [!NOTE]
+>
+> ### What CrewBench Does Not Do
+>
+> - Does not replace Git
+> - Does not replace an IDE
+> - Does not introduce new AI models
+> - Does not focus on prompt presets
+>
+> CrewBench operates at the **control and observability layer**, not the editor or model layer.
 
 ## Getting Started
 
