@@ -87,7 +87,7 @@ const BehaviorLogModal: React.FC<BehaviorLogModalProps> = ({ visible, workspace,
       title={
         <div className='flex items-center gap-2'>
           <IconHistory />
-          {t('behavior.title') || 'Behavior History'}
+          {t('Logs') || 'Logs'}
         </div>
       }
       contentStyle={{ height: '70vh', padding: 0 }}
@@ -95,9 +95,9 @@ const BehaviorLogModal: React.FC<BehaviorLogModalProps> = ({ visible, workspace,
       <div className='flex flex-col h-full'>
         <div className='flex items-center justify-between px-4 py-2 border-b border-border'>
           <Tabs activeTab={activeTab} onChange={setActiveTab} type='text'>
-            <Tabs.TabPane key='all' title={t('behavior.all') || 'All'} />
-            <Tabs.TabPane key='user' title={t('behavior.user') || 'User'} />
-            <Tabs.TabPane key='agent' title={t('behavior.agent') || 'Agent'} />
+            <Tabs.TabPane key='all' title={t('All') || 'All'} />
+            <Tabs.TabPane key='user' title={t('User') || 'User'} />
+            <Tabs.TabPane key='agent' title={t('Agent') || 'Agent'} />
           </Tabs>
           <div className='flex gap-2'>
             <Button size='small' icon={<IconRefresh />} onClick={loadLogs} />
