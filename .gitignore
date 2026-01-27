@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Electron caches
 **/Library/Caches/Electron/
 **/.electron/
 **/.electron-cache/
