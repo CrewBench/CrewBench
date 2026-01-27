@@ -64,6 +64,7 @@ export class GeminiAgent {
   private authType: AuthType | null = null;
   private scheduler: CoreToolScheduler | null = null;
   private trackedCalls: TrackedToolCall[] = [];
+  private toolCallLogMap = new Map<string, string>();
   private abortController: AbortController | null = null;
   private activeMsgId: string | null = null;
   private onStreamEvent: (event: { type: string; data: unknown; msg_id: string }) => void;
@@ -318,6 +319,35 @@ export class GeminiAgent {
             let description = '';
             let metadata: Record<string, unknown> = {};
 
+            // Check if we have a pre-existing log for this tool call (e.g. run_shell_command)
+            const existingLogId = this.toolCallLogMap.get(tc.request.callId);
+            if (existingLogId) {
+              const command = getArg(['CommandLine', 'commandLine', 'command', 'cmd', 'exec', 'code', 'script']);
+              // Determine success/failure and output
+              const status = tc.status;
+              const output = tc.response?.responseParts ? (Array.isArray(tc.response.responseParts) ? tc.response.responseParts.map((p) => (typeof p === 'string' ? p : JSON.stringify(p))).join('') : JSON.stringify(tc.response.responseParts)) : '';
+
+              this.onStreamEvent({
+                type: 'behavior_log_update',
+                data: {
+                  id: existingLogId,
+                  update: {
+                    metadata: {
+                      command,
+                      status,
+                      output,
+                      exitCode: tc.status === 'success' ? 0 : 1, // Simplified inference
+                    },
+                  },
+                },
+                msg_id: this.activeMsgId ?? uuid(),
+              });
+
+              // Remove from map and skip default logging
+              this.toolCallLogMap.delete(tc.request.callId);
+              continue;
+            }
+
             // Explicit File Create
             if (!actionType && (name.includes('write') || name.includes('create'))) {
               const filePath = getArg(['TargetFile', 'targetFile', 'filePath', 'path', 'file']);
@@ -369,6 +399,17 @@ export class GeminiAgent {
                   actionType,
                   description,
                   metadata,
+                },
+                msg_id: this.activeMsgId ?? uuid(),
+              });
+            } else {
+              // Generic tool execution logging
+              this.onStreamEvent({
+                type: 'behavior_log',
+                data: {
+                  actionType: 'tool_execution',
+                  description: `Agent executed tool: ${name}`,
+                  metadata: { toolName: name, args },
                 },
                 msg_id: this.activeMsgId ?? uuid(),
               });
@@ -483,6 +524,32 @@ export class GeminiAgent {
           // 立即保护工具调用，防止被取消
           // Immediately protect tool call to prevent cancellation
           globalToolCallGuard.protect(toolRequest.callId);
+
+          // Intercept run_shell_command (and variants) to log immediately
+          if (toolRequest.name === 'run_shell_command' || toolRequest.name === 'execute_command' || toolRequest.name === 'run_terminal_command' || toolRequest.name === 'bash') {
+            const args = (toolRequest.args || {}) as Record<string, unknown>;
+            const command = args.command || args.commandLine || args.cmd || args.code || args.script || (toolRequest.args ? JSON.stringify(toolRequest.args) : 'Unknown Command');
+
+            const logId = uuid();
+            this.toolCallLogMap.set(toolRequest.callId, logId);
+
+            this.onStreamEvent({
+              type: 'behavior_log',
+              data: {
+                id: logId,
+                actionType: 'command_execution',
+                description: `Agent executed command: ${command}`,
+                metadata: {
+                  command,
+                  workingDirectory: args.cwd || args.working_directory || undefined,
+                  status: 'attempted',
+                  timestamp: Date.now(),
+                },
+              },
+              msg_id,
+            });
+          }
+
           return;
         }
         this.onStreamEvent({

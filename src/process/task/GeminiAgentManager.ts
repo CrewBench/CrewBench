@@ -188,6 +188,7 @@ export class GeminiAgentManager extends BaseAgentManager<{
     return result;
   }
   private _accumulatedResponse = '';
+  private _hasToolExecutionInTurn = false;
 
   init() {
     super.init();
@@ -199,6 +200,7 @@ export class GeminiAgentManager extends BaseAgentManager<{
       if (data.type === 'start') {
         this.status = 'running';
         this._accumulatedResponse = ''; // Reset on new response
+        this._hasToolExecutionInTurn = false;
       }
 
       // 处理预览打开事件（chrome-devtools 导航触发）/ Handle preview open event (triggered by chrome-devtools navigation)
@@ -227,6 +229,16 @@ export class GeminiAgentManager extends BaseAgentManager<{
         const responseContent = this._accumulatedResponse;
         const truncated = responseContent.length > 150 ? responseContent.substring(0, 150) + '...' : responseContent;
 
+        let description = truncated ? `Agent: "${truncated}"` : 'Agent finished responding';
+        let fullResponse = responseContent.length > 500 ? responseContent.substring(0, 500) + '...' : responseContent;
+
+        if ((!truncated && this._hasToolExecutionInTurn) || (!truncated && !responseContent)) {
+          description = this._hasToolExecutionInTurn ? 'Agent executed command/tool' : 'Agent finished responding (no output)';
+          if (!fullResponse) {
+            fullResponse = 'Executed No Response.';
+          }
+        }
+
         void (async () => {
           try {
             const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
@@ -235,9 +247,10 @@ export class GeminiAgentManager extends BaseAgentManager<{
               actor: 'Agent',
               agentType: 'Gemini',
               actionType: 'response',
-              description: truncated ? `Agent: "${truncated}"` : 'Agent finished responding',
+              description: description,
               metadata: {
-                fullResponse: responseContent.length > 500 ? responseContent.substring(0, 500) + '...' : responseContent,
+                fullResponse: fullResponse,
+                hasToolExecution: this._hasToolExecutionInTurn,
               },
             });
           } catch (e) {
@@ -245,10 +258,13 @@ export class GeminiAgentManager extends BaseAgentManager<{
           }
         })();
         this._accumulatedResponse = ''; // Clear after logging
+        this._hasToolExecutionInTurn = false;
       }
 
       if (data.type === 'behavior_log') {
+        this._hasToolExecutionInTurn = true;
         const logData = data.data as {
+          id?: string;
           actionType: string;
           description: string;
           metadata?: Record<string, unknown>;
@@ -258,6 +274,7 @@ export class GeminiAgentManager extends BaseAgentManager<{
           try {
             const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
             getBehaviorLogService().log({
+              id: logData.id,
               workspace: this.workspace,
               actor: 'Agent',
               agentType: 'Gemini',
@@ -267,6 +284,23 @@ export class GeminiAgentManager extends BaseAgentManager<{
             });
           } catch (e) {
             console.error('Failed to log agent behavior', e);
+          }
+        })();
+      }
+
+      if (data.type === 'behavior_log_update') {
+        this._hasToolExecutionInTurn = true; // Updates also mean tools ran
+        const logData = data.data as {
+          id: string;
+          update: Record<string, unknown>;
+        };
+
+        void (async () => {
+          try {
+            const { getBehaviorLogService } = await import('@/process/services/behaviorLogService');
+            getBehaviorLogService().updateLog(logData.id, logData.update);
+          } catch (e) {
+            console.error('Failed to update agent behavior log', e);
           }
         })();
       }

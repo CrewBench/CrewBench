@@ -25,12 +25,26 @@ class BehaviorLogService {
     return dbInstance.db;
   }
 
-  public log(params: { workspace?: string; actor: 'User' | 'Agent' | 'System'; agentType?: string; actionType: string; description: string; metadata?: Record<string, unknown> }): BehaviorLogEntry {
+  // ✅ ONLY responsibility: if fullResponse === '' → add tool/command line
+  private fillEmptyFullResponse(metadata?: Record<string, unknown>): Record<string, unknown> | undefined {
+    if (!metadata) return metadata;
+    if (metadata.fullResponse !== '') return metadata;
+
+    return {
+      ...metadata,
+      fullResponse: `CommandTool used`,
+    };
+  }
+
+  public log(params: { id?: string; workspace?: string; actor: 'User' | 'Agent' | 'System'; agentType?: string; actionType: string; description: string; metadata?: Record<string, unknown> }): BehaviorLogEntry {
     console.log('[BehaviorLogService] Logging:', params);
     const db = this.getDb();
-    const id = uuid();
+
+    const id = params.id || uuid();
     const createdAt = Date.now();
-    const metadataStr = params.metadata ? JSON.stringify(params.metadata) : null;
+
+    const enrichedMetadata = this.fillEmptyFullResponse(params.metadata);
+    const metadataStr = enrichedMetadata ? JSON.stringify(enrichedMetadata) : null;
 
     const stmt = db.prepare(`
       INSERT INTO behavior_logs (
@@ -47,13 +61,52 @@ class BehaviorLogService {
       agentType: params.agentType,
       actionType: params.actionType,
       description: params.description,
-      metadata: params.metadata,
+      metadata: enrichedMetadata,
       createdAt,
     };
   }
 
+  public updateLog(id: string, params: Partial<Exclude<BehaviorLogEntry, 'id' | 'createdAt'>>): void {
+    console.log('[BehaviorLogService] Updating log:', { id, params });
+    const db = this.getDb();
+
+    const updates: string[] = [];
+    const values: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    if (params.workspace !== undefined) {
+      updates.push('workspace = ?');
+      values.push(params.workspace || null);
+    }
+    if (params.actor !== undefined) {
+      updates.push('actor = ?');
+      values.push(params.actor);
+    }
+    if (params.agentType !== undefined) {
+      updates.push('agent_type = ?');
+      values.push(params.agentType || null);
+    }
+    if (params.actionType !== undefined) {
+      updates.push('action_type = ?');
+      values.push(params.actionType);
+    }
+    if (params.description !== undefined) {
+      updates.push('description = ?');
+      values.push(params.description);
+    }
+    if (params.metadata !== undefined) {
+      const enrichedMetadata = this.fillEmptyFullResponse(params.metadata);
+      updates.push('metadata = ?');
+      values.push(enrichedMetadata ? JSON.stringify(enrichedMetadata) : null);
+    }
+
+    if (updates.length === 0) return;
+
+    values.push(id);
+    const sql = `UPDATE behavior_logs SET ${updates.join(', ')} WHERE id = ?`;
+    db.prepare(sql).run(...values);
+  }
+
   public getLogs(workspace?: string, limit = 100): BehaviorLogEntry[] {
-    console.log('[BehaviorLogService] getLogs called with:', { workspace, limit });
     const db = this.getDb();
     let stmt;
 
